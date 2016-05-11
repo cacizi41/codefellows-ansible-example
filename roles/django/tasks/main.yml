@@ -14,7 +14,7 @@
     - git
 
 - name: Clone Django Repository
-  git: repo=https://github.com/cewing/djangoblog_uwpce.git dest={{ django_home }} force=yes
+  git: repo=https://github.com/flegald/django-imager.git dest={{ django_home }} force=yes version=deploy-wenjing
 
 - name: Install Python Dependencies
   sudo: yes
@@ -27,7 +27,7 @@
     db_host: "{{ hostvars[groups[rds_db_instance][0]] }}"
 
 - name: Get DB Password
-  include_vars: secrets.yml
+  include_vars: source.yml
 
 
 - name: Set DB URL
@@ -38,14 +38,18 @@
   environment:
     DATABASE_URL: "{{ db_url }}"
   django_manage:
-    app_path: "{{ django_home }}"
-    settings: mysite.production
+    app_path: "{{ django_home }}/imagersite"
+    settings: imagersite.settings
     command: migrate
 
 - name: Collect Static Files
   environment:
     DATABASE_URL: "{{ db_url }}"
   django_manage:
-    app_path: "{{ django_home }}"
-    settings: mysite.production
+    app_path: "{{ django_home }}/imagersite"
+    settings: imagersite.settings
     command: collectstatic
+
+- name: Make Media Directory
+  sudo: yes
+  file: path={{ django_home }}/imagersite/media state=directory mode=0775 group=www-data owner=www-data
